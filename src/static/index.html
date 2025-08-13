@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Contagem de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .search-section {
+            background: #e8f4fd;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .search-input {
+            flex: 1;
+        }
+
+        .products-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .summary-card p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Contagem de Estoque</h1>
+            <p>Gerencie seus produtos de forma eficiente e gere relatórios completos</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('cadastro')">Iniciar Contagem</button>
+                <button class="tab" onclick="showTab('busca')">Busca Lote</button>
+                <button class="tab" onclick="showTab('resumo')">Resumo do Estoque</button>
+                <button class="tab" onclick="showTab('relatorios')">Relatórios</button>
+            </div>
+
+            <!-- Tab Cadastro -->
+            <div id="cadastro" class="tab-content active">
+                <div class="form-section">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">Cadastrar Novo Produto</h2>
+                    <form id="produto-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="codigo">Código do Produto *</label>
+                                <input type="text" id="codigo" name="codigo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nome">Nome do Produto *</label>
+                                <input type="text" id="nome" name="nome" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lote">Lote *</label>
+                                <input type="text" id="lote" name="lote" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="validade">Data de Validade *</label>
+                                <input type="date" id="validade" name="validade" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="quantidade">Quantidade *</label>
+                                <input type="number" id="quantidade" name="quantidade" min="0" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
+                    </form>
+                </div>
+                
+                <div id="cadastro-status"></div>
+            </div>
+
+            <!-- Tab Busca -->
+            <div id="busca" class="tab-content">
+                <div class="search-section">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">Buscar Produto por Código</h2>
+                    <div class="search-row">
+                        <div class="form-group search-input">
+                            <label for="busca-codigo">Código do Produto</label>
+                            <input type="text" id="busca-codigo" placeholder="Digite o código do produto">
+                        </div>
+                        <button class="btn btn-primary" onclick="buscarProduto()">Buscar</button>
+                        <button class="btn btn-success" onclick="listarTodosProdutos()">Listar Todos</button>
+                    </div>
+                </div>
+
+                <div id="busca-status"></div>
+                
+                <!-- Seção para adicionar lote a produto existente -->
+                <div class="form-section" id="adicionar-lote-section" style="display: none; background: #e8f5e8;">
+                    <h3 style="margin-bottom: 20px; color: #27ae60;">➕ Adicionar Lote ao Produto</h3>
+                    <p id="produto-info" style="margin-bottom: 15px; font-weight: 600;"></p>
+                    
+                    <form id="adicionar-lote-form">
+                        <input type="hidden" id="produto-codigo-hidden" name="codigo">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="novo-lote">Lote *</label>
+                                <input type="text" id="novo-lote" name="lote" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nova-validade">Data de Validade *</label>
+                                <input type="date" id="nova-validade" name="validade" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nova-quantidade">Quantidade *</label>
+                                <input type="number" id="nova-quantidade" name="quantidade" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <button type="submit" class="btn btn-success">Adicionar Lote</button>
+                            <button type="button" class="btn btn-danger" onclick="cancelarAdicaoLote()">Cancelar</button>
+                        </div>
+                    </form>
+                    
+                    <div id="adicionar-lote-status"></div>
+                </div>
+                
+                <div class="products-table" id="produtos-resultado" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Lote</th>
+                                <th>Validade</th>
+                                <th>Quantidade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Resumo -->
+            <div id="resumo" class="tab-content">
+                <div class="summary-cards" id="summary-cards">
+                    <!-- Cards serão preenchidos dinamicamente -->
+                </div>
+                
+                <div class="products-table" id="resumo-tabela" style="display: none;">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">Resumo por Código de Produto</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome do Produto</th>
+                                <th>Quantidade Total</th>
+                                <th>Total de Lotes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resumo-tbody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button class="btn btn-primary" onclick="carregarResumo()" style="margin-top: 20px;">Atualizar Resumo</button>
+            </div>
+
+            <!-- Tab Relatórios -->
+            <div id="relatorios" class="tab-content">
+                <div class="form-section">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">Gerar Relatórios</h2>
+                    <p style="margin-bottom: 20px;">Gere relatórios completos do seu estoque em formato PDF ou Excel.</p>
+                    
+                    <div class="actions-section">
+                        <button class="btn btn-success" onclick="gerarRelatorioPDF()">
+                            📄 Gerar Relatório PDF
+                        </button>
+                        <button class="btn btn-primary" onclick="gerarRelatorioExcel()">
+                            📊 Gerar Relatório Excel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Seção de Limpeza de Dados -->
+                <div class="form-section" style="border: 2px solid #e74c3c; background: #fdf2f2;">
+                    <h2 style="margin-bottom: 20px; color: #c0392b;">⚠️ Zona de Perigo</h2>
+                    <p style="margin-bottom: 20px; color: #e74c3c; font-weight: 600;">
+                        Esta ação irá apagar TODOS os dados do estoque permanentemente. Use apenas quando quiser começar uma nova contagem do zero.
+                    </p>
+                    
+                    <div class="actions-section">
+                        <button class="btn btn-danger" onclick="confirmarLimpezaDados()">
+                            🗑️ Limpar Todos os Dados
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="relatorio-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api';
+
+        // Função para mostrar/esconder tabs
+        function showTab(tabName) {
+            // Esconder todas as tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remover classe active de todos os botões
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            // Mostrar tab selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Carregar dados específicos da tab
+            if (tabName === 'resumo') {
+                carregarResumo();
+            }
+        }
+
+        // Função para mostrar mensagens de status
+        function showStatus(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status-message ${isError ? 'status-error' : 'status-success'}">${message}</div>`;
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 5000);
+        }
+
+        // Cadastrar produto
+        document.getElementById('produto-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const produto = {
+                codigo: formData.get('codigo'),
+                nome: formData.get('nome'),
+                lote: formData.get('lote'),
+                validade: formData.get('validade'),
+                quantidade: parseInt(formData.get('quantidade'))
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(produto)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                // Mostrar mensagem específica baseada na ação
+                if (data.acao === 'soma_quantidade') {
+                    showStatus('cadastro-status', `✅ ${data.message}`, false);
+                } else {
+                    showStatus('cadastro-status', `✅ ${data.message}`, false);
+                }
+                
+                e.target.reset();
+            } catch (error) {
+                showStatus('cadastro-status', `Erro ao cadastrar produto: ${error.message}`, true);
+            }
+        });
+
+        // Buscar produto por código
+        async function buscarProduto() {
+            const codigo = document.getElementById('busca-codigo').value.trim();
+            
+            if (!codigo) {
+                showStatus('busca-status', 'Por favor, digite um código para buscar.', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos/por-codigo/${encodeURIComponent(codigo)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const produtos = await response.json();
+                
+                if (produtos.length === 0) {
+                    showStatus('busca-status', 'Nenhum produto encontrado com este código.', true);
+                    document.getElementById('produtos-resultado').style.display = 'none';
+                } else {
+                    showStatus('busca-status', `${produtos.length} produto(s) encontrado(s).`);
+                    exibirProdutos(produtos);
+                }
+            } catch (error) {
+                showStatus('busca-status', `Erro ao buscar produto: ${error.message}`, true);
+            }
+        }
+
+        // Listar todos os produtos
+        async function listarTodosProdutos() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const produtos = await response.json();
+                showStatus('busca-status', `${produtos.length} produto(s) encontrado(s).`);
+                exibirProdutos(produtos);
+            } catch (error) {
+                showStatus('busca-status', `Erro ao listar produtos: ${error.message}`, true);
+            }
+        }
+
+        // Exibir produtos na tabela
+        function exibirProdutos(produtos) {
+            const tbody = document.getElementById('produtos-tbody');
+            tbody.innerHTML = '';
+
+            produtos.forEach(produto => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${produto.codigo}</td>
+                    <td>${produto.nome}</td>
+                    <td>${produto.lote}</td>
+                    <td>${new Date(produto.validade).toLocaleDateString('pt-BR')}</td>
+                    <td>${produto.quantidade}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="excluirProduto(${produto.id})" style="padding: 5px 10px; font-size: 0.8rem;">
+                            Excluir
+                        </button>
+                    </td>
+                `;
+            });
+
+            document.getElementById('produtos-resultado').style.display = 'block';
+        }
+
+        // Excluir produto
+        async function excluirProduto(id) {
+            if (!confirm('Tem certeza que deseja excluir este produto?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                showStatus('busca-status', 'Produto excluído com sucesso!');
+                // Recarregar a lista
+                const codigo = document.getElementById('busca-codigo').value.trim();
+                if (codigo) {
+                    buscarProduto();
+                } else {
+                    listarTodosProdutos();
+                }
+            } catch (error) {
+                showStatus('busca-status', `Erro ao excluir produto: ${error.message}`, true);
+            }
+        }
+
+        // Carregar resumo do estoque
+        async function carregarResumo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos/resumo`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const resumo = await response.json();
+                
+                // Calcular estatísticas
+                const totalProdutos = resumo.length;
+                const totalQuantidade = resumo.reduce((sum, item) => sum + item.quantidade_total, 0);
+                const totalLotes = resumo.reduce((sum, item) => sum + item.total_lotes, 0);
+
+                // Atualizar cards de resumo
+                const cardsContainer = document.getElementById('summary-cards');
+                cardsContainer.innerHTML = `
+                    <div class="summary-card">
+                        <h3>${totalProdutos}</h3>
+                        <p>Produtos Diferentes</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>${totalQuantidade}</h3>
+                        <p>Quantidade Total</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>${totalLotes}</h3>
+                        <p>Total de Lotes</p>
+                    </div>
+                `;
+
+                // Atualizar tabela de resumo
+                const tbody = document.getElementById('resumo-tbody');
+                tbody.innerHTML = '';
+
+                resumo.forEach(item => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${item.codigo}</td>
+                        <td>${item.nome}</td>
+                        <td>${item.quantidade_total}</td>
+                        <td>${item.total_lotes}</td>
+                    `;
+                });
+
+                document.getElementById('resumo-tabela').style.display = 'block';
+            } catch (error) {
+                const cardsContainer = document.getElementById('summary-cards');
+                cardsContainer.innerHTML = `<div class="status-message status-error">Erro ao carregar resumo: ${error.message}</div>`;
+            }
+        }
+
+        // Gerar relatório PDF
+        async function gerarRelatorioPDF() {
+            showStatus('relatorio-status', 'Gerando relatório PDF...', false);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/relatorio/pdf`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio_estoque_${new Date().toISOString().split('T')[0]}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showStatus('relatorio-status', 'Relatório PDF gerado e baixado com sucesso!');
+            } catch (error) {
+                showStatus('relatorio-status', `Erro ao gerar relatório PDF: ${error.message}`, true);
+            }
+        }
+
+        // Gerar relatório Excel
+        async function gerarRelatorioExcel() {
+            showStatus('relatorio-status', 'Gerando relatório Excel...', false);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/relatorio/excel`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio_estoque_${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showStatus('relatorio-status', 'Relatório Excel gerado e baixado com sucesso!');
+            } catch (error) {
+                showStatus('relatorio-status', `Erro ao gerar relatório Excel: ${error.message}`, true);
+            }
+        }
+
+        // Confirmar limpeza de dados
+        function confirmarLimpezaDados() {
+            const confirmacao = confirm(
+                "⚠️ ATENÇÃO: Esta ação irá apagar TODOS os produtos do estoque permanentemente!\n\n" +
+                "Você tem certeza que deseja continuar?\n\n" +
+                "Esta ação NÃO pode ser desfeita!"
+            );
+            
+            if (confirmacao) {
+                const segundaConfirmacao = confirm(
+                    "🚨 ÚLTIMA CONFIRMAÇÃO!\n\n" +
+                    "Todos os dados serão perdidos para sempre.\n\n" +
+                    "Clique OK para confirmar a exclusão de TODOS os dados."
+                );
+                
+                if (segundaConfirmacao) {
+                    limparTodosDados();
+                }
+            }
+        }
+
+        // Limpar todos os dados
+        // Buscar produto por código
+        async function buscarProduto() {
+            const codigo = document.getElementById('busca-codigo').value.trim();
+            
+            if (!codigo) {
+                showStatus('busca-status', 'Por favor, digite um código de produto.', true);
+                return;
+            }
+
+            showStatus('busca-status', 'Buscando produto...', false);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos/por-codigo/${codigo}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const produtos = await response.json();
+                
+                if (produtos.length === 0) {
+                    showStatus('busca-status', 'Nenhum produto encontrado com este código.', true);
+                    document.getElementById('produtos-resultado').style.display = 'none';
+                    document.getElementById('adicionar-lote-section').style.display = 'none';
+                    return;
+                }
+
+                // Mostrar botão para adicionar lote se produto existe
+                mostrarSecaoAdicionarLote(produtos[0]);
+                
+                // Preencher tabela
+                const tbody = document.getElementById('produtos-tbody');
+                tbody.innerHTML = '';
+
+                produtos.forEach(produto => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${produto.codigo}</td>
+                        <td>${produto.nome}</td>
+                        <td>${produto.lote}</td>
+                        <td>${new Date(produto.validade).toLocaleDateString('pt-BR')}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>
+                            <button class="btn btn-danger btn-small" onclick="excluirProduto(${produto.id})">Excluir</button>
+                        </td>
+                    `;
+                });
+
+                document.getElementById('produtos-resultado').style.display = 'block';
+                showStatus('busca-status', `${produtos.length} lote(s) encontrado(s) para o código ${codigo}.`);
+                
+            } catch (error) {
+                showStatus('busca-status', `Erro ao buscar produto: ${error.message}`, true);
+                document.getElementById('produtos-resultado').style.display = 'none';
+                document.getElementById('adicionar-lote-section').style.display = 'none';
+            }
+        }
+
+        // Mostrar seção para adicionar lote
+        function mostrarSecaoAdicionarLote(produto) {
+            document.getElementById('produto-codigo-hidden').value = produto.codigo;
+            document.getElementById('produto-info').textContent = `Produto: ${produto.codigo} - ${produto.nome}`;
+            document.getElementById('adicionar-lote-section').style.display = 'block';
+            
+            // Limpar campos do formulário
+            document.getElementById('novo-lote').value = '';
+            document.getElementById('nova-validade').value = '';
+            document.getElementById('nova-quantidade').value = '';
+            document.getElementById('adicionar-lote-status').innerHTML = '';
+        }
+
+        // Cancelar adição de lote
+        function cancelarAdicaoLote() {
+            document.getElementById('adicionar-lote-section').style.display = 'none';
+        }
+
+        // Adicionar lote ao produto
+        document.getElementById('adicionar-lote-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                codigo: formData.get('codigo'),
+                lote: formData.get('lote'),
+                validade: formData.get('validade'),
+                quantidade: parseInt(formData.get('quantidade'))
+            };
+
+            showStatus('adicionar-lote-status', 'Adicionando lote...', false);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos/adicionar-lote`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || `Erro ${response.status}`);
+                }
+
+                showStatus('adicionar-lote-status', result.message);
+                
+                // Limpar formulário
+                document.getElementById('novo-lote').value = '';
+                document.getElementById('nova-validade').value = '';
+                document.getElementById('nova-quantidade').value = '';
+                
+                // Atualizar lista de produtos
+                buscarProduto();
+                
+            } catch (error) {
+                showStatus('adicionar-lote-status', `Erro: ${error.message}`, true);
+            }
+        });
+
+        // Event listener duplicado removido - mantendo apenas o primeiro
+
+        async function limparTodosDados() {
+            if (!confirm('⚠️ ATENÇÃO!\n\nEsta ação irá apagar TODOS os dados do estoque permanentemente.\n\nTem certeza que deseja continuar?')) {
+                return;
+            }
+            
+            if (!confirm('🚨 ÚLTIMA CONFIRMAÇÃO!\n\nTodos os produtos e lotes serão removidos.\nEsta ação NÃO pode ser desfeita.\n\nConfirma a exclusão de todos os dados?')) {
+                return;
+            }
+            
+            showStatus('relatorio-status', 'Limpando todos os dados...', false);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/produtos/limpar-todos`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                showStatus('relatorio-status', result.message || 'Todos os dados foram limpos com sucesso!');
+                
+                // Limpar todas as tabelas e resumos na interface
+                document.getElementById('produtos-tbody').innerHTML = '';
+                document.getElementById('resumo-tbody').innerHTML = '';
+                document.getElementById('produtos-resultado').style.display = 'none';
+                document.getElementById('resumo-tabela').style.display = 'none';
+                document.getElementById('adicionar-lote-section').style.display = 'none';
+                
+                // Recarregar resumo para mostrar zeros
+                carregarResumo();
+                
+            } catch (error) {
+                showStatus('relatorio-status', `Erro ao limpar dados: ${error.message}`, true);
+            }
+        }
+
+        // Carregar resumo ao inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarResumo();
+        });
+    </script>
+</body>
+</html>
+
